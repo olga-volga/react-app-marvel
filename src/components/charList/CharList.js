@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import PropTypes from 'prop-types';
 
 import Spinner from '../spinner/Spinner';
@@ -8,78 +8,72 @@ import MarvelService from '../../services/MarvelService';
 import './charList.scss';
 //import abyss from '../../resources/img/abyss.jpg';
 
-class CharList extends Component {
-    state = {
-        characters: [],
-        loading: true,
-        error: false,
-        loadingMoreItems: false,
-        offset: 210,
-        charEnded: false
-    }
-    charRefs = [];
+const CharList = (props) => {
+    const [characters, setCharacters] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [loadingMoreItems, setLoadingMoreItems] = useState(false);
+    const [offset, setOffset] = useState(210);
+    const [charEnded, setCharEnded] = useState(false);
 
-    marvelService = new MarvelService();
+    const charRefs = useRef([]);
 
-    componentDidMount() {
-        this.updateCharList();
-        window.addEventListener('scroll', this.onScroll);
-    }
-    componentWillUnmount() {
-        window.removeEventListener('scroll', this.onScroll);
-    }
-    onScroll = () => {
+    const marvelService = new MarvelService();
+
+    useEffect(() => {
+        if (loading && !charEnded) {
+            updateCharList();
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('scroll', onScroll);
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+        }
+    });
+
+    const onScroll = () => {
         let scrollHeight = Math.max(
             document.body.scrollHeight, document.documentElement.scrollHeight,
             document.body.offsetHeight, document.documentElement.offsetHeight,
             document.body.clientHeight, document.documentElement.clientHeight
         );
-        if (this.state.loadingMoreItems) return;
+        if (loadingMoreItems) return;
 
         if (window.pageYOffset + document.documentElement.clientHeight >= scrollHeight) {
-            this.updateCharList(this.state.offset);
+            updateCharList(offset);
         }
-        if (this.state.charEnded) {
-            window.removeEventListener('scroll', this.onScroll);
+        if (charEnded) {
+            window.removeEventListener('scroll', onScroll);
         }
     }
-    onLoadingMoreItems = (value) => {
-        this.setState({
-            loadingMoreItems: value
-        })
+    const onCharactersLoaded = (newCharacters) => {
+        setLoadingMoreItems(false);
+        setCharacters(characters => [...characters, ...newCharacters]);
+        setLoading(false);
+        
+        setOffset(offset => offset + 9);
+        setCharEnded(newCharacters.length < 9 ? true : false);
     }
-    onCharactersLoaded = (newCharacters) => {
-        this.setState(({offset, characters}) => ({
-            characters: [...characters, ...newCharacters],
-            loading: false,
-            loadingMoreItems: false,
-            offset: offset + 9,
-            charEnded: newCharacters.length < 9 ? true : false 
-        }))
+    const onError = () => {
+        setLoading(false);
+        setError(true);
     }
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
+    const focusCharItem = (i) => {
+        charRefs.current.forEach(item => item.classList.remove('char__item_selected'));
+        //this.charRefs.current[i].classList.add('char__item_selected');
+        charRefs.current[i].focus();
     }
-    setCharRef = ref => {
-        this.charRefs.push(ref);
+    const updateCharList = (offset) => {
+        setLoadingMoreItems(true);
+        marvelService.getAllCharacters(offset)
+            .then(onCharactersLoaded)
+            .catch(onError)
+            .finally(() => setLoadingMoreItems(false));
+        //console.log(loadingMoreItems)
     }
-    focusCharItem = (i) => {
-        this.charRefs.forEach(item => item.classList.remove('char__item_selected'));
-        //this.charRefs[i].classList.add('char__item_selected');
-        this.charRefs[i].focus();
-    }
-    updateCharList = (offset) => {
-        this.onLoadingMoreItems(true);
-        this.marvelService.getAllCharacters(offset)
-            .then(this.onCharactersLoaded)
-            .catch(this.onError)
-            .finally(() => this.onLoadingMoreItems(false));
-        //console.log(this.state.loadingMoreItems)
-    }
-    renderCharList = (characters) => {
+    const renderCharList = (characters) => {
         const items = characters.map((item, i) => {
             const {id, name, thumbnail} = item;
             let clazz = thumbnail.includes('image_not_available') || thumbnail.includes('4c002e0305708') ? {objectFit: 'unset'} : null;
@@ -87,16 +81,16 @@ class CharList extends Component {
                 <li 
                     key={id}
                     tabIndex={0} 
-                    ref={this.setCharRef}
+                    ref={el => charRefs.current[i] = el}
                     className="char__item" 
                     onClick={() => {
-                        this.props.updateId(id);
-                        this.focusCharItem(i);
+                        props.updateId(id);
+                        focusCharItem(i);
                     }}
                     onKeyPress={(e) => {
                         if (e.key === 'Enter') {
-                            this.props.updateId(id);
-                            this.focusCharItem(i);
+                            props.updateId(id);
+                            focusCharItem(i);
                         }
                     }} >
                         <img src={thumbnail} alt={name} style={clazz} />
@@ -110,60 +104,28 @@ class CharList extends Component {
             </ul>
         )
     }
+    const charList = renderCharList(characters);
+    const errorMessage = error ? <ErrorMessage /> : null;
+    const spinner = loading ? <Spinner /> : null;
+    const content = !(loading || error) ? charList : null;
 
-    render() {
-        const {characters, loading, error, loadingMoreItems, offset, charEnded} = this.state;
+    const btnStyle = charEnded ? {display: 'none'} : null;
 
-        const charList = this.renderCharList(characters);
-        const errorMessage = error ? <ErrorMessage /> : null;
-        const spinner = loading ? <Spinner /> : null;
-        const content = !(loading || error) ? charList : null;
-
-        const btnStyle = charEnded ? {display: 'none'} : null;
-
-        return (
-            <div className="char__list">
-                {errorMessage}
-                {spinner}
-                {content}
-                <button 
-                    className="button button__main button__long" 
-                    style={btnStyle}
-                    disabled={loadingMoreItems}
-                    onClick={() => this.updateCharList(offset)}>
-                        <div className="inner">load more</div>
-                </button>
-            </div>
-        )
-        
-        /*return (
-            <div className="char__list">
-                <ul className="char__grid">
-                    {errorMessage}
-                    {spinner}
-                    {content}
-                </ul>
-                <button className="button button__main button__long">
+    return (
+        <div className="char__list">
+            {errorMessage}
+            {spinner}
+            {content}
+            <button 
+                className="button button__main button__long" 
+                style={btnStyle}
+                disabled={loadingMoreItems}
+                onClick={() => updateCharList(offset)}>
                     <div className="inner">load more</div>
-                </button>
-            </div>
-        )*/
-    }
+            </button>
+        </div>
+    )
 }
-
-/*const CharItems = ({characters}) => {
-    const items = characters.map(item => {
-        const {id, name, thumbnail} = item;
-        let clazz = thumbnail.indexOf('image_not_available') > -1 ? {objectFit: 'unset'} : null;
-        return (
-            <li key={id} className="char__item">
-                <img src={thumbnail} alt={name} style={clazz} />
-                <div className="char__name">{name}</div>
-            </li>
-        )
-    })
-    return items;
-}*/
 
 CharList.propTypes = {
     updateId: PropTypes.func.isRequired

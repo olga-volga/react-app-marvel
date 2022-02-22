@@ -1,4 +1,4 @@
-import {Component} from 'react';
+import {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 
 import Spinner from '../spinner/Spinner';
@@ -9,67 +9,52 @@ import MarvelService from '../../services/MarvelService';
 import './charInfo.scss';
 //import thor from '../../resources/img/thor.jpeg';
 
-class CharInfo extends Component {
-    state = {
-        info: null,
-        loading: false,
-        error: false
-    }
-    marvelService = new MarvelService();
+const CharInfo = (props) => {
+    const [info, setInfo] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+
+    const marvelService = new MarvelService();
     
-    componentDidMount() {
-        this.updateCharInfo();
+    useEffect(() => {
+        updateCharInfo();
+    }, [props.id]);
+
+    const onLoading = () => {
+        setLoading(true);
     }
-    componentDidUpdate(prevProps) {
-        if (this.props.id !== prevProps.id) {
-            this.updateCharInfo();
-        }
+    const onInfoLoaded = (data) => {
+        setInfo(data);
+        setLoading(false);
     }
-    onLoading = () => {
-        this.setState({
-            loading: true
-        })
+    const onError = () => {
+        setLoading(false);
+        setError(true);
     }
-    onInfoLoaded = (info) => {
-        this.setState({
-            info,
-            loading: false
-        })
-    }
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
-    }
-    updateCharInfo = () => {
-        if (!this.props.id) {
+    const updateCharInfo = () => {
+        if (!props.id) {
             return;
         }
-        this.onLoading();
-        this.marvelService.getCharacter(this.props.id)
-            .then(this.onInfoLoaded)
-            .catch(this.onError);
+        onLoading();
+        marvelService.getCharacter(props.id)
+            .then(onInfoLoaded)
+            .catch(onError);
 
         // for Error Boundary
         //this.foo.bar = 0;
     }
-    render() {
-        const {info, loading, error} = this.state;
-
-        const defaultContent = info || loading || error ? null : <Skeleton />;
-        const errorMessage = error ? <ErrorMessage /> : null;
-        const spinner = loading ? <Spinner /> : null;
-        const content = !(!info || loading || error) ? <View info={info} /> : null;
-        return (
-            <div className="char__info">
-                {defaultContent}
-                {errorMessage}
-                {spinner}
-                {content}
-            </div>
-        )
-    }
+    const defaultContent = info || loading || error ? null : <Skeleton />;
+    const errorMessage = error ? <ErrorMessage /> : null;
+    const spinner = loading ? <Spinner /> : null;
+    const content = !(!info || loading || error) ? <View info={info} /> : null;
+    return (
+        <div className="char__info">
+            {defaultContent}
+            {errorMessage}
+            {spinner}
+            {content}
+        </div>
+    )
 }
 
 const View = ({info}) => {
