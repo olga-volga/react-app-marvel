@@ -4,42 +4,31 @@ import PropTypes from 'prop-types';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Skeleton from '../skeleton/Skeleton';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './charInfo.scss';
 //import thor from '../../resources/img/thor.jpeg';
 
 const CharInfo = (props) => {
     const [info, setInfo] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
 
-    const marvelService = new MarvelService();
+    const {loading, error, clearError, getCharacter} = useMarvelService();
     
     useEffect(() => {
         updateCharInfo();
     }, [props.id]);
 
-    const onLoading = () => {
-        setLoading(true);
-    }
     const onInfoLoaded = (data) => {
         setInfo(data);
-        setLoading(false);
-    }
-    const onError = () => {
-        setLoading(false);
-        setError(true);
     }
     const updateCharInfo = () => {
         if (!props.id) {
             return;
         }
-        onLoading();
-        marvelService.getCharacter(props.id)
+        clearError();
+        getCharacter(props.id)
             .then(onInfoLoaded)
-            .catch(onError);
-
+            
         // for Error Boundary
         //this.foo.bar = 0;
     }

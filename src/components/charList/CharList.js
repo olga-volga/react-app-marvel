@@ -3,31 +3,28 @@ import PropTypes from 'prop-types';
 
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './charList.scss';
-//import abyss from '../../resources/img/abyss.jpg';
 
 const CharList = (props) => {
     const [characters, setCharacters] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [loadingMoreItems, setLoadingMoreItems] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
     const charRefs = useRef([]);
 
-    const marvelService = new MarvelService();
+    const {loading, error, getAllCharacters} = useMarvelService();
 
     useEffect(() => {
-        if (loading && !charEnded) {
-            updateCharList();
+        if (/*loading && */!charEnded) {
+            updateCharList(offset, true);
         }
     }, []);
 
     useEffect(() => {
-        window.addEventListener('scroll', onScroll);
+        //window.addEventListener('scroll', onScroll);
         return () => {
             window.removeEventListener('scroll', onScroll);
         }
@@ -51,27 +48,19 @@ const CharList = (props) => {
     const onCharactersLoaded = (newCharacters) => {
         setLoadingMoreItems(false);
         setCharacters(characters => [...characters, ...newCharacters]);
-        setLoading(false);
-        
         setOffset(offset => offset + 9);
         setCharEnded(newCharacters.length < 9 ? true : false);
     }
-    const onError = () => {
-        setLoading(false);
-        setError(true);
+    const updateCharList = (offset, initial) => {
+        initial ? setLoadingMoreItems(false) : setLoadingMoreItems(true);
+        getAllCharacters(offset)
+            .then(onCharactersLoaded)
+        //console.log(loadingMoreItems);
     }
     const focusCharItem = (i) => {
         charRefs.current.forEach(item => item.classList.remove('char__item_selected'));
         //this.charRefs.current[i].classList.add('char__item_selected');
         charRefs.current[i].focus();
-    }
-    const updateCharList = (offset) => {
-        setLoadingMoreItems(true);
-        marvelService.getAllCharacters(offset)
-            .then(onCharactersLoaded)
-            .catch(onError)
-            .finally(() => setLoadingMoreItems(false));
-        //console.log(loadingMoreItems)
     }
     const renderCharList = (characters) => {
         const items = characters.map((item, i) => {
@@ -106,8 +95,7 @@ const CharList = (props) => {
     }
     const charList = renderCharList(characters);
     const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error) ? charList : null;
+    const spinner = loading && !loadingMoreItems ? <Spinner /> : null;
 
     const btnStyle = charEnded ? {display: 'none'} : null;
 
@@ -115,7 +103,7 @@ const CharList = (props) => {
         <div className="char__list">
             {errorMessage}
             {spinner}
-            {content}
+            {charList}
             <button 
                 className="button button__main button__long" 
                 style={btnStyle}

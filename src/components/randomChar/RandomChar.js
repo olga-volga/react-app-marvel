@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './randomChar.scss';
 //import thor from '../../resources/img/thor.jpeg';
@@ -9,10 +9,8 @@ import mjolnir from '../../resources/img/mjolnir.png';
 
 const RandomChar = () => {
     const [char, setChar] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
-    const marvelService = new MarvelService();
+    const {loading, error, clearError, getCharacter} = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -22,24 +20,15 @@ const RandomChar = () => {
         }
     }, []);
 
-    const onLoading = () => {
-        setLoading(true);
-    }
     const onCharLoaded = (char) => {
         setChar(char);
-        setLoading(false);
-    }
-    const onError = () => {
-        setLoading(false);
-        setError(true);
     }
     const updateChar = () => {
-        //const id = 1011005;
+        clearError();
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
-        onLoading();
-        marvelService.getCharacter(id)
+        
+        getCharacter(id)
             .then(onCharLoaded)
-            .catch(onError);
     }
     const errorMessage = error ? <ErrorMessage /> : null;
     const spinner = loading ? <Spinner /> : null;
@@ -68,7 +57,7 @@ const RandomChar = () => {
 
 const View = ({char}) => {
     const {name, description, thumbnail, homepage, wiki} = char;
-    let clazz = thumbnail.indexOf('image_not_available') > -1 ? {objectFit: 'contain'} : null;
+    let clazz = thumbnail && thumbnail.indexOf('image_not_available') > -1 ? {objectFit: 'contain'} : null;
     return (
         <div className="randomchar__block">
             <img src={thumbnail} alt="Random character" style={clazz} className="randomchar__img"/>
