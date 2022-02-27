@@ -61,8 +61,12 @@ const ComicsList = () => {
             {spinner}
             {errorMessage}
             {comicsList}
-            <button className="button button__main button__long" onClick={() => updateComics(offset)}>
-                <div className="inner">load more</div>
+            <button 
+                className="button button__main button__long" 
+                disabled={loadMoreComics}
+                onClick={() => updateComics(offset)}
+                style={{display: comicsEnded ? 'none' : null}}>
+                    <div className="inner">load more</div>
             </button>
         </div>
     )
