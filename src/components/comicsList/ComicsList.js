@@ -36,7 +36,7 @@ const ComicsList = () => {
     }
     const renderComics = (comics) => {
         const items = comics.map((item, i) => {
-            const {id, name, url, thumbnail, price} = item;
+            const {id, name, thumbnail, price} = item;
             return (
                 <li key={i} className="comics__item">
                     <Link to={`/comics/${id}`}>
