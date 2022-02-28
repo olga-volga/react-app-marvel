@@ -39,18 +39,25 @@ const useMarvelService = () => {
         // возвращаем тарнсформированный массив с объектами-комиксами
         return res.data.results.map(_transformComics);
     }
+    // получаем данные комиксa
+    const getComic = async (id) => {
+        const res = await request(`${_apiBase}comics/${id}?${_apiKey}`);
+        return _transformComics(res.data.results[0]);
+    }
     // трансформируем данные для отображения комикса
     const _transformComics = (comic) => {
         return {
             id: comic.id,
             name: comic.title,
-            url: comic.urls[0].url,
+            description: comic.description || 'There is no description',
+            pageCount: comic.pageCount ? comic.pageCount + ' pages' : 'No info about pages',
+            language: comic.textObjects[0].language,
             thumbnail: comic.thumbnail.path + '.' + comic.thumbnail.extension,
-            price: comic.prices[0].price
+            price: comic.prices[0].price ? comic.prices[0].price + '$' : 'Not available'
         }
     }
 
-    return {loading, error, clearError, getAllCharacters, getCharacter, getAllComics};
+    return {loading, error, clearError, getAllCharacters, getCharacter, getAllComics, getComic};
 }
 
 export default useMarvelService;
