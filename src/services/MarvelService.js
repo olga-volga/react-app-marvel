@@ -21,6 +21,11 @@ const useMarvelService = () => {
         // возвращаем трансформированные данные 
         return _transformCharacter(res.data.results[0]);
     }
+    // получаем данные одного персонажа по name
+    const getCharacterByName = async (name) => {
+        const res = await request(`${_apiBase}characters?name=${name}&${_apiKey}`);
+        return res.data.results.map(_transformCharacter);
+    }
     // трансформируем данные для отображения случайного персонажа
     const _transformCharacter = (char) => {
         return {
@@ -57,7 +62,7 @@ const useMarvelService = () => {
         }
     }
 
-    return {loading, error, clearError, getAllCharacters, getCharacter, getAllComics, getComic};
+    return {loading, error, clearError, getAllCharacters, getCharacter, getCharacterByName, getAllComics, getComic};
 }
 
 export default useMarvelService;
