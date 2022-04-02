@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { useFormik } from 'formik';
 import * as Yup from  'yup';
+import {Link} from 'react-router-dom';
 
 import useMarvelService from '../../services/MarvelService';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -30,9 +31,9 @@ const CharSearchForm = () => {
     const message = (!char) ? null : char.length > 0 ?
                     <div className="form__message-block">
                         <div className="form__message form__message_success">There is! Visit {char[0].name} page?</div>
-                        <a href="#" className="button button__secondary">
+                        <Link to={`/${char[0].id}`} className="button button__secondary">
                             <div className="inner">TO PAGE</div>
-                        </a>
+                        </Link>
                     </div> : 
                     <div className="form__message form__message_error">
                         The character was not found. Check the name and try again
