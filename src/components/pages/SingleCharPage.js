@@ -39,7 +39,7 @@ const SingleCharPage = () => {
 }
 
 const View = ({char}) => {
-    const {name, description, thumbnail, comics} = char;
+    const {name, fullDescription, thumbnail, comics} = char;
     const items = comics.slice(0, 10).map((item, i) => {
         const comicId = +item.resourceURI.replace(/\D/gi, '').slice(1);
         return (
@@ -54,7 +54,7 @@ const View = ({char}) => {
             <img src={thumbnail} alt={name} className="single-char__img"/>
             <div className="single-comic__info">
                 <h2 className="single-comic__name">{name}</h2>
-                <p className="single-comic__descr">{description}</p>
+                <p className="single-comic__descr">{fullDescription}</p>
                 <div className="char__comics">Comics:</div>
                 <ul className="char__comics-list">
                     {content}
