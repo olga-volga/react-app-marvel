@@ -1,6 +1,6 @@
 @import '../../style/variables.scss';
 
-.single-comic {
+.single-page {
     margin-top: 50px;
     display: grid;
     grid-template-columns: 293px 550px auto;
@@ -9,6 +9,10 @@
     &__img {
         width: 293px;
         height: 450px;
+        &_char {
+            width: 293px;
+            height: 293px;
+        }
     }
     &__name {
         font-weight: bold;
@@ -35,9 +39,5 @@
         &:hover {
             color: $main-color;
         }
-    }
-    .single-char__img {
-        width: 293px;
-        height: 293px;
     }
 }

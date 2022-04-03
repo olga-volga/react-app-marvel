@@ -31,7 +31,7 @@ const CharSearchForm = () => {
     const message = (!char) ? null : char.length > 0 ?
                     <div className="form__message-block">
                         <div className="form__message form__message_success">There is! Visit {char[0].name} page?</div>
-                        <Link to={`/${char[0].id}`} className="button button__secondary">
+                        <Link to={`/characters/${char[0].id}`} className="button button__secondary">
                             <div className="inner">TO PAGE</div>
                         </Link>
                     </div> : 
