@@ -1,9 +1,17 @@
 import {Link} from 'react-router-dom';
+import {Helmet} from "react-helmet";
 
 const SingleComicPage = ({data}) => {
     const {name, description, pageCount, language, thumbnail, price} = data;
     return (
         <div className="single-page">
+            <Helmet>
+                <meta
+                    name="description"
+                    content={`${name} comics book`}
+                    />
+                <title>{name}</title>
+            </Helmet>
             <img src={thumbnail} alt={name} className="single-page__img"/>
             <div className="single-page__info">
                 <h2 className="single-page__name">{name}</h2>

@@ -1,4 +1,5 @@
 import {Link} from 'react-router-dom';
+import {Helmet} from "react-helmet";
 
 const SingleCharPage = ({data}) => {
     const {name, fullDescription, thumbnail, comics} = data;
@@ -13,6 +14,13 @@ const SingleCharPage = ({data}) => {
     const content = comics.length ? items : 'There are no comics.';
     return (
         <div className="single-page">
+            <Helmet>
+                <meta
+                    name="description"
+                    content={`Page about ${name} character`}
+                    />
+                <title>{`${name} page`}</title>
+            </Helmet>
             <img src={thumbnail} alt={name} className="single-page__img_char"/>
             <div className="single-page__info">
                 <h2 className="single-page__name">{name}</h2>
