@@ -22,9 +22,9 @@ const App = () => {
                             <Route exact path="/">
                                 <MainPage />
                             </Route>
-                            {<Route exact path="/characters/:id">
+                            <Route exact path="/characters/:id">
                                 <SinglePage service="getCharacter" Component={SingleCharPage} />
-                            </Route>}
+                            </Route>
                             <Route exact path="/comics">
                                 <ComicsPage />
                             </Route>
