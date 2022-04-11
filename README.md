@@ -1,4 +1,24 @@
-# Getting Started with Create React App
+# Marvel information portal
+**React App based on [Marvel API](https://developer.marvel.com/)**
+
+**In this project I mastered:**
+* React
+* React Hooks
+* react-create-app
+* react-router
+* react-helmet
+* Formik, Yup
+
+**Demo:**
+[Marvel React App](https://app-marvel-yakutova.herokuapp.com)
+
+**To run this project locally:**
+* clone with `git clone https://github.com/olga-volga/react-app-marvel.git`
+* `cd marvel`
+* `npm install`
+* `npm start`
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
