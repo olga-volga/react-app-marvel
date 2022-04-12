@@ -5,8 +5,25 @@ import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
 import './comicsList.scss';
-//import uw from '../../resources/img/UW.png';
-//import xMen from '../../resources/img/x-men.png';
+
+const createContent = (process, Component, loadMoreComics) => {
+    switch(process) {
+        case 'waiting':
+            return <Spinner />;
+            break;
+        case 'loading':
+            return loadMoreComics ? <Component /> : <Spinner />;
+            break;
+        case 'confirmed':
+            return <Component />;
+            break;
+        case 'error':
+            return <ErrorMessage />;
+            break;
+        default:
+            throw new Error('Unexpected process state');
+    }
+}
 
 const ComicsList = () => {
     const [comics, setComics] = useState([]);
@@ -14,7 +31,7 @@ const ComicsList = () => {
     const [offset, setOffset] = useState(10);
     const [comicsEnded, setComicsEnded] = useState(false);
 
-    const {loading, error, clearError, getAllComics} = useMarvelService();
+    const {getAllComics, process, setProcess} = useMarvelService();
     
     useEffect(() => {
         if (!comicsEnded) {
@@ -33,6 +50,7 @@ const ComicsList = () => {
         
         getAllComics(offset)
             .then(onLoadedComics)
+            .then(() => setProcess('confirmed'))
     }
     const renderComics = (comics) => {
         const items = comics.map((item, i) => {
@@ -53,15 +71,10 @@ const ComicsList = () => {
             </ul>
         );
     }
-    const comicsList = renderComics(comics);
-    const spinner = loading && !loadMoreComics ? <Spinner /> : null;
-    const errorMessage = error ? <ErrorMessage /> : null;
 
     return (
         <div className="comics__list">
-            {spinner}
-            {errorMessage}
-            {comicsList}
+            {createContent(process, () => renderComics(comics), loadMoreComics)}
             <button 
                 className="button button__main button__long" 
                 disabled={loadMoreComics}

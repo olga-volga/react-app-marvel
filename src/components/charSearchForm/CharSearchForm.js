@@ -11,7 +11,7 @@ import '../../style/button.scss';
 
 const CharSearchForm = () => {
     const [char, setChar] = useState(null);
-    const {loading, error, getCharacterByName, clearError} = useMarvelService();
+    const {getCharacterByName, clearError, process, setProcess} = useMarvelService();
     
     const formik = useFormik({
         initialValues: {name: ''},
@@ -25,9 +25,10 @@ const CharSearchForm = () => {
     const updateChar = (name) => {
         clearError();
         getCharacterByName(name)
-            .then(res => setChar(res));
+            .then(res => setChar(res))
+            .then(() => setProcess('confirmed'))
     };
-    const errorMessage = error ? <ErrorMessage /> : null;
+    const errorMessage = process === 'error' ? <ErrorMessage /> : null;
     const message = (!char) ? null : char.length > 0 ?
                     <div className="form__message-block">
                         <div className="form__message form__message_success">There is! Visit {char[0].name} page?</div>
@@ -54,7 +55,7 @@ const CharSearchForm = () => {
                     }} 
                     onBlur={formik.handleBlur}
                     className="form__input" />
-                <button type="submit" disabled={loading} className="button button__main">
+                <button type="submit" disabled={process === 'loading'} className="button button__main">
                     <div className="inner">FIND</div>
                 </button>
                 {formik.errors.name && formik.touched.name ? <div className="form__message form__message_error">{formik.errors.name}</div> : null}

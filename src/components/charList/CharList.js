@@ -8,6 +8,25 @@ import useMarvelService from '../../services/MarvelService';
 
 import './charList.scss';
 
+const createContent = (process, Component, loadingMoreItems) => {
+    switch(process) {
+        case 'waiting':
+            return <Spinner />;
+            break;
+        case 'loading':
+            return loadingMoreItems ? <Component /> : <Spinner />;
+            break;
+        case 'confirmed':
+            return <Component />;
+            break;
+        case 'error':
+            return <ErrorMessage />;
+            break;
+        default:
+            throw new Error('Unexpected process state');
+    }
+}
+
 const CharList = (props) => {
     const [characters, setCharacters] = useState([]);
     const [loadingMoreItems, setLoadingMoreItems] = useState(false);
@@ -16,10 +35,10 @@ const CharList = (props) => {
 
     const charRefs = useRef([]);
 
-    const {loading, error, getAllCharacters} = useMarvelService();
+    const {getAllCharacters, process, setProcess} = useMarvelService();
 
     useEffect(() => {
-        if (/*loading && */!charEnded) {
+        if (!charEnded) {
             updateCharList(offset, true);
         }
     }, []);
@@ -56,7 +75,7 @@ const CharList = (props) => {
         initial ? setLoadingMoreItems(false) : setLoadingMoreItems(true);
         getAllCharacters(offset)
             .then(onCharactersLoaded)
-        //console.log(loadingMoreItems);
+            .then(() => setProcess('confirmed'))
     }
     const focusCharItem = (i) => {
         charRefs.current.forEach(item => item.classList.remove('char__item_selected'));
@@ -97,17 +116,10 @@ const CharList = (props) => {
             </ul>
         )
     }
-    const charList = renderCharList(characters);
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading && !loadingMoreItems ? <Spinner /> : null;
-
     const btnStyle = charEnded ? {display: 'none'} : null;
-
     return (
         <div className="char__list">
-            {errorMessage}
-            {spinner}
-            {charList}
+            {createContent(process, () => renderCharList(characters), loadingMoreItems)}
             <button 
                 className="button button__main button__long" 
                 style={btnStyle}
