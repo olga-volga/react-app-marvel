@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useMemo} from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import PropTypes from 'prop-types';
 
@@ -116,10 +116,13 @@ const CharList = (props) => {
             </ul>
         )
     }
+    const elements = useMemo(() => {
+        return createContent(process, () => renderCharList(characters), loadingMoreItems);
+    }, [process]);
     const btnStyle = charEnded ? {display: 'none'} : null;
     return (
         <div className="char__list">
-            {createContent(process, () => renderCharList(characters), loadingMoreItems)}
+            {elements}
             <button 
                 className="button button__main button__long" 
                 style={btnStyle}
